@@ -7,9 +7,9 @@ namespace ElectricFox.BdfFontLib
 {
     internal class BdfFontLoader
     {
-        private int currentChar = -1;
+        private BdfCharacterLoader? currentChar = null;
 
-        private bool readingProperties;
+        private bool isReadingProperties;
 
         private string? _fontName;
         private string? _version;
@@ -17,6 +17,7 @@ namespace ElectricFox.BdfFontLib
         private BdfBoundingBox? _fontBoundingBox;
         private int _charCount;
         private readonly Dictionary<string, string> _properties = new();
+        private List<BdfChar> _chars = new();
 
         public async Task<BdfFont> LoadAsync(string filePath)
         {
@@ -32,13 +33,14 @@ namespace ElectricFox.BdfFontLib
             }
 
             return new BdfFont
-                {
-                    FontName = _fontName ?? throw new BdfLoadException("Font name was not specified"),
-                    Version = _version ?? string.Empty,
-                    Size = _size ?? throw new BdfLoadException("SIZE was not specified"),
-                    FontBoundingBox = _fontBoundingBox ?? throw new BdfLoadException("Bounding Box was not specified"),
-                    CharCount = _charCount,
-                    Properties = new Dictionary<string, string>(_properties)
+            {
+                FontName = _fontName ?? throw new BdfLoadException("Font name was not specified"),
+                Version = _version ?? string.Empty,
+                Size = _size ?? throw new BdfLoadException("SIZE was not specified"),
+                FontBoundingBox = _fontBoundingBox ?? throw new BdfLoadException("Bounding Box was not specified"),
+                CharCount = _charCount,
+                Properties = new Dictionary<string, string>(_properties),
+                Chars = _chars.ToDictionary(c => c.Encoding)
             };
         }
 
@@ -107,9 +109,9 @@ namespace ElectricFox.BdfFontLib
             await reader.CompleteAsync();
         }
 
-        bool TryReadLine(ref ReadOnlySequence<byte> buffer, out ReadOnlySequence<byte> line)
+        private bool TryReadLine(ref ReadOnlySequence<byte> buffer, out ReadOnlySequence<byte> line)
         {
-            // Look for a EOL in the buffer.
+            // Look for LF
             SequencePosition? position = buffer.PositionOf((byte)'\n');
 
             if (position == null)
@@ -118,83 +120,133 @@ namespace ElectricFox.BdfFontLib
                 return false;
             }
 
-            // Skip the line + the \n.
+            // Slice up to the LF (not including it)
             line = buffer.Slice(0, position.Value);
+
+            // If the line ends with CR, drop it
+            if (!line.IsEmpty)
+            {
+                var lastByte = line.Slice(line.Length - 1, 1);
+                if (lastByte.FirstSpan[0] == (byte)'\r')
+                {
+                    line = line.Slice(0, line.Length - 1);
+                }
+            }
+
+            // Advance buffer past LF
             buffer = buffer.Slice(buffer.GetPosition(1, position.Value));
+
             return true;
         }
 
         private void CheckAttributeLength(int expected, int actual, string command)
         {
-            if (expected != actual)
+            if (expected > actual)
             {
                 throw new BdfLoadException($"Invalid number of attributes for {command}. Expected {expected}, got {actual}");
             }
+        }
+
+        public static (string Keyword, string Value) ParseAttribute(string line)
+        {
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                throw new ArgumentException("Line cannot be null or empty.", nameof(line));
+            }
+
+            int spaceIndex = line.IndexOf(' ');
+            if (spaceIndex < 0)
+            {
+                throw new FormatException("Line does not contain a space separating keyword and value.");
+            }
+
+            string keyword = line.Substring(0, spaceIndex).Trim();
+            string rawValue = line.Substring(spaceIndex + 1).Trim();
+
+            string value = rawValue.Trim();
+            if (value.StartsWith("\"") && value.EndsWith("\"") && value.Length >= 2)
+            {
+                value = value.Substring(1, value.Length - 2);
+            }
+
+            return (keyword, value);
         }
 
         private void ProcessLine(ReadOnlySequence<byte> line)
         {
             // Convert the line to a string and process it.
             var lineString = Encoding.UTF8.GetString(line.ToArray());
-            var values = lineString.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if (values.Length == 0)
+
+            if (currentChar is not null)
             {
+                var complete = currentChar.ParseCharacter(lineString);
+                if (complete)
+                {
+                    _chars.Add(currentChar.GetCharacter());
+                    currentChar = null;
+                }
                 return;
             }
 
-            var command = values[0].ToUpperInvariant();
-            var attributeCount = values.Length - 1;
-
-            if (currentChar == -1)
+            if (isReadingProperties)
             {
-                if (readingProperties)
+                if (string.Equals(lineString, "ENDPROPERTIES", StringComparison.OrdinalIgnoreCase))
                 {
-                    _properties[command] = lineString[(lineString.IndexOf(' ') + 1)..].Trim();
+                    isReadingProperties = false;
+                    return;
                 }
-                else
-                {
-                    switch (command)
-                    {
-                        case "STARTFONT":
-                            CheckAttributeLength(1, attributeCount, command);
-                            _version = values[1];
-                            break;
-                        case "STARTCHAR":
-                            CheckAttributeLength(1, attributeCount, command);
-                            if (int.TryParse(values[1], out int charCode))
-                            {
-                                currentChar = charCode;
-                                //font.Characters[charCode] = new BdfCharacter { CharCode = charCode };
-                            }
-                            break;
-                        case "FONT":
-                            CheckAttributeLength(1, attributeCount, command);
-                            _fontName = values[1];
-                            break;
-                        case "SIZE":
-                            CheckAttributeLength(3, attributeCount, command);
-                            _size = BdfSize.Parse(values[1], values[2], values[3]);
-                            break;
-                        case "FONTBOUNDINGBOX":
-                            CheckAttributeLength(4, attributeCount, command);
-                            _fontBoundingBox = BdfBoundingBox.Parse(values[1], values[2], values[3], values[4]);
-                            break;
-                        case "CHARS":
-                            CheckAttributeLength(1, attributeCount, command);
-                            _charCount = int.Parse(values[1]);
-                            break;
-                        case "STARTPROPERTIES":
-                            CheckAttributeLength(1, attributeCount, command);
-                            readingProperties = true;
-                            _properties.Clear();
-                            break;
-                        case "ENDPROPERTIES":
-                            CheckAttributeLength(0, attributeCount, command);
-                            readingProperties = false;
-                            break;
-                    }
 
+                var property = ParseAttribute(lineString);
+                _properties[property.Keyword] = property.Value;
+            }
+            else
+            {
+                var values = lineString.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                if (values.Length == 0)
+                {
+                    return;
                 }
+
+                var command = values[0].ToUpperInvariant();
+                var attributeCount = values.Length - 1;
+
+                switch (command)
+                {
+                    case "STARTFONT":
+                        CheckAttributeLength(1, attributeCount, command);
+                        _version = values[1];
+                        break;
+                    case "STARTCHAR":
+                        CheckAttributeLength(1, attributeCount, command);
+                        currentChar = new BdfCharacterLoader(values[1]);
+                        break;
+                    case "FONT":
+                        CheckAttributeLength(1, attributeCount, command);
+                        _fontName = values[1];
+                        break;
+                    case "SIZE":
+                        CheckAttributeLength(3, attributeCount, command);
+                        _size = BdfSize.Parse(values[1], values[2], values[3]);
+                        break;
+                    case "FONTBOUNDINGBOX":
+                        CheckAttributeLength(4, attributeCount, command);
+                        _fontBoundingBox = BdfBoundingBox.Parse(values[1], values[2], values[3], values[4]);
+                        break;
+                    case "CHARS":
+                        CheckAttributeLength(1, attributeCount, command);
+                        _charCount = int.Parse(values[1]);
+                        break;
+                    case "STARTPROPERTIES":
+                        CheckAttributeLength(1, attributeCount, command);
+                        isReadingProperties = true;
+                        _properties.Clear();
+                        break;
+                    case "ENDPROPERTIES":
+                        CheckAttributeLength(0, attributeCount, command);
+                        isReadingProperties = false;
+                        break;
+                }
+
             }
         }
     }

@@ -10,6 +10,7 @@ namespace ElectricFox.BdfViewer
         public required BdfBoundingBox FontBoundingBox { get; init; }
         public required int CharCount { get; init; }
         public required Dictionary<string, string> Properties { get; init; }
+        public required IReadOnlyDictionary<int, BdfChar> Chars { get; init; }
 
         public static async Task<BdfFont> LoadAsync(string fileName)
         {
