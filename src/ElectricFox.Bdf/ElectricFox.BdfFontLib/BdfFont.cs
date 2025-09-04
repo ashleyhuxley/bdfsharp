@@ -1,4 +1,5 @@
 ﻿using ElectricFox.BdfFontLib;
+using System.Drawing;
 
 namespace ElectricFox.BdfViewer
 {
@@ -16,6 +17,26 @@ namespace ElectricFox.BdfViewer
         {
             var loader = new BdfFontLoader();
             return await loader.LoadAsync(fileName);
+        }
+
+        public Size MeasureString(string text)
+        {
+            return MeasureString(text.Select(c => (int)c));
+        }
+
+        public Size MeasureString(IEnumerable<int> values)
+        {
+            int width = 0;
+            int height = 0;
+            foreach (int c in values)
+            {
+                if (Chars.TryGetValue(c, out BdfChar? bdfChar))
+                {
+                    width += bdfChar.DeviceWidth?.Width ?? bdfChar.BoundingBox.Width;
+                    height = Math.Max(height, bdfChar.BoundingBox.Height);
+                }
+            }
+            return new Size(width, height);
         }
     }
 }
