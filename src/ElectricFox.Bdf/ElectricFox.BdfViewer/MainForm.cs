@@ -26,7 +26,6 @@ namespace ElectricFox.BdfViewer
                     try
                     {
                         loadedFont = await BdfFont.LoadAsync(openDialog.FileName);
-                        propertyGrid.SelectedObject = loadedFont;
                         LoadCharacters();
                     }
                     catch (BdfLoadException ex)
@@ -79,7 +78,7 @@ namespace ElectricFox.BdfViewer
             {
                 for (int y = 0; y < c.BoundingBox.Height; y++)
                 {
-                    b.SetPixel(x, y, c[y, x] ? Color.Black : Color.White);
+                    b.SetPixel(x, y, c[x, y] ? Color.Black : Color.White);
                 }
             }
 
@@ -102,6 +101,30 @@ namespace ElectricFox.BdfViewer
             else
             {
                 glyphBox.Image = null;
+            }
+        }
+
+        private void previewTextbox_TextChanged(object sender, EventArgs e)
+        {
+            previewTextImage.Refresh();
+        }
+
+        private void previewTextImage_Paint(object sender, PaintEventArgs e)
+        {
+            if (loadedFont is null)
+            {
+                return;
+            }
+
+            var g = e.Graphics;
+
+            var data = loadedFont.RenderBitmap(previewTextbox.Text);
+            for (int x = 0; x < data.GetLength(0); x++)
+            {
+                for (int y = 0; y < data.GetLength(1); y++)
+                {
+                    g.FillRectangle(data[x, y] ? Brushes.Black : Brushes.White, x + 20, y + 20, 1, 1);
+                }
             }
         }
     }

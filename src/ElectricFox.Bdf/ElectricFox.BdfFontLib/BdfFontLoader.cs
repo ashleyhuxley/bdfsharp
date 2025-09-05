@@ -1,11 +1,11 @@
-﻿using ElectricFox.BdfViewer;
-using System.Buffers;
+﻿using System.Buffers;
+using System.Drawing;
 using System.IO.Pipelines;
 using System.Text;
 
 namespace ElectricFox.BdfFontLib
 {
-    internal class BdfFontLoader
+    internal class BdfFontLoader : BdfLoader
     {
         private BdfCharacterLoader? currentChar = null;
 
@@ -32,6 +32,15 @@ namespace ElectricFox.BdfFontLib
                 await Task.WhenAll(reading, writing);
             }
 
+            var geommetry = new BdfGeometry
+            {
+                ScalableWidth = _SWidth,
+                DeviceWidth = _DWidth,
+                ScalableWidth1 = _SWidth1,
+                DeviceWidth1 = _DWidth1,
+                VVector = _VVector,
+            };
+
             return new BdfFont
             {
                 FontName = _fontName ?? throw new BdfLoadException("Font name was not specified"),
@@ -40,7 +49,8 @@ namespace ElectricFox.BdfFontLib
                 FontBoundingBox = _fontBoundingBox ?? throw new BdfLoadException("Bounding Box was not specified"),
                 CharCount = _charCount,
                 Properties = new Dictionary<string, string>(_properties),
-                Chars = _chars.ToDictionary(c => c.Encoding)
+                Chars = _chars.ToDictionary(c => c.Encoding),
+                Geometry = geommetry
             };
         }
 
@@ -139,21 +149,8 @@ namespace ElectricFox.BdfFontLib
             return true;
         }
 
-        private void CheckAttributeLength(int expected, int actual, string command)
-        {
-            if (expected > actual)
-            {
-                throw new BdfLoadException($"Invalid number of attributes for {command}. Expected {expected}, got {actual}");
-            }
-        }
-
         public static (string Keyword, string Value) ParseAttribute(string line)
         {
-            if (string.IsNullOrWhiteSpace(line))
-            {
-                throw new ArgumentException("Line cannot be null or empty.", nameof(line));
-            }
-
             int spaceIndex = line.IndexOf(' ');
             if (spaceIndex < 0)
             {
@@ -193,6 +190,11 @@ namespace ElectricFox.BdfFontLib
                 if (string.Equals(lineString, "ENDPROPERTIES", StringComparison.OrdinalIgnoreCase))
                 {
                     isReadingProperties = false;
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(lineString))
+                {
                     return;
                 }
 
@@ -244,6 +246,26 @@ namespace ElectricFox.BdfFontLib
                     case "ENDPROPERTIES":
                         CheckAttributeLength(0, attributeCount, command);
                         isReadingProperties = false;
+                        break;
+                    case "SWIDTH":
+                        CheckAttributeLength(2, attributeCount, command);
+                        _SWidth = ParseSize(values[1], values[2], command);
+                        break;
+                    case "DWIDTH":
+                        CheckAttributeLength(2, attributeCount, command);
+                        _DWidth = ParseSize(values[1], values[2], command);
+                        break;
+                    case "SWIDTH1":
+                        CheckAttributeLength(2, attributeCount, command);
+                        _SWidth1 = ParseSize(values[1], values[2], command);
+                        break;
+                    case "DWIDTH1":
+                        CheckAttributeLength(2, attributeCount, command);
+                        _DWidth1 = ParseSize(values[1], values[2], command);
+                        break;
+                    case "VVECTOR":
+                        CheckAttributeLength(2, attributeCount, command);
+                        _VVector = ParsePoint(values[1], values[2], command);
                         break;
                 }
 
