@@ -42,7 +42,7 @@ Height = 19
 
 Here, the red cross marks the text’s origin (0,0). The negative Y value indicates that part of the text extends above the baseline, while the height ensures that descenders (like in g or y) would also be captured correctly.
 
-![Example showing the position of two letters with the origin highlighted](https://github.com/ashleyhuxley/bdfsharp/blob/main/docs/qu-example.png)
+![Example showing the position of two letters with the origin highlighted](https://raw.githubusercontent.com/ashleyhuxley/bdfsharp/refs/heads/main/docs/qu-example.png)
 
 ## Rendering Text
 
