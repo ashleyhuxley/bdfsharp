@@ -10,7 +10,7 @@ namespace ElectricFox.BdfFontLib
         public required BdfBoundingBox FontBoundingBox { get; init; }
         public required int CharCount { get; init; }
         public required Dictionary<string, string> Properties { get; init; }
-        public required IReadOnlyDictionary<int, BdfGlyph> Chars { get; init; }
+        public required IReadOnlyDictionary<int, BdfGlyph> Glyphs { get; init; }
         public required BdfGeometry Geometry { get; init; }
 
         public static async Task<BdfFont> LoadAsync(string fileName)
@@ -19,12 +19,12 @@ namespace ElectricFox.BdfFontLib
             return await loader.LoadAsync(fileName);
         }
 
-        public Size MeasureString(string text)
+        public Rectangle MeasureString(string text)
         {
             return MeasureString(text.Select(c => (int)c));
         }
 
-        public Size MeasureString(IEnumerable<int> values)
+        public Rectangle MeasureString(IEnumerable<int> values)
         {
             int minX = 0, minY = 0, maxX = 0, maxY = 0;
 
@@ -32,22 +32,24 @@ namespace ElectricFox.BdfFontLib
 
             foreach (int c in values)
             {
-                if (Chars.TryGetValue(c, out BdfGlyph? bdfChar))
+                if (Glyphs.TryGetValue(c, out BdfGlyph? glyph))
                 {
-                    minX = Math.Min(minX, origin.X + bdfChar.BoundingBox.XOffset);
-                    minY = Math.Min(minY, origin.Y + bdfChar.BoundingBox.YOffset);
-                    maxX = Math.Max(maxX, origin.X + bdfChar.BoundingBox.XOffset + bdfChar.BoundingBox.Width);
-                    maxY = Math.Max(maxY, origin.Y + bdfChar.BoundingBox.YOffset + bdfChar.BoundingBox.Height);
+                    minX = Math.Min(minX, origin.X - glyph.BoundingBox.XOffset);
+                    maxX = Math.Max(maxX, origin.X + glyph.BoundingBox.XOffset + glyph.BoundingBox.Width);
 
-                    if (bdfChar.Geometry.DeviceWidth.HasValue)
+                    // Y axis is reversed
+                    minY = Math.Min(minY, origin.Y - glyph.BoundingBox.Height);
+                    maxY = Math.Max(maxY, origin.Y - glyph.BoundingBox.YOffset);
+
+                    if (glyph.Geometry.DeviceSize.HasValue)
                     {
-                        origin.X += bdfChar.Geometry.DeviceWidth.Value.Width;
-                        origin.Y += bdfChar.Geometry.DeviceWidth.Value.Height;
+                        origin.X += glyph.Geometry.DeviceSize.Value.Width;
+                        origin.Y += glyph.Geometry.DeviceSize.Value.Height;
                     }
-                    else if (this.Geometry.DeviceWidth.HasValue)
+                    else if (this.Geometry.DeviceSize.HasValue)
                     {
-                        origin.X += this.Geometry.DeviceWidth.Value.Width;
-                        origin.X += this.Geometry.DeviceWidth.Value.Height;
+                        origin.X += this.Geometry.DeviceSize.Value.Width;
+                        origin.X += this.Geometry.DeviceSize.Value.Height;
                     }
                     else
                     {
@@ -56,7 +58,7 @@ namespace ElectricFox.BdfFontLib
                 }
             }
 
-            return new Size(maxX - minX, maxY - minY);
+            return Rectangle.FromLTRB(minX, minY, maxX, maxY);
         }
 
 
@@ -64,19 +66,20 @@ namespace ElectricFox.BdfFontLib
         {
             var size = MeasureString(text);
             var result = new bool[size.Width, size.Height];
-            Point origin = new(0, 0);
+            Point origin = new(0 - size.X, 0 - size.Y);
+
             foreach (char c in text)
             {
-                if (Chars.TryGetValue((int)c, out BdfGlyph? bdfChar))
+                if (Glyphs.TryGetValue((int)c, out BdfGlyph? glyph))
                 {
-                    for (int row = 0; row < bdfChar.BoundingBox.Height; row++)
+                    for (int row = 0; row < glyph.Height; row++)
                     {
-                        for (int col = 0; col < bdfChar.BoundingBox.Width; col++)
+                        for (int col = 0; col < glyph.Width; col++)
                         {
-                            if (bdfChar[col, row])
+                            if (glyph[col, row])
                             {
-                                int x = origin.X + bdfChar.BoundingBox.XOffset + col;
-                                int y = origin.Y + bdfChar.BoundingBox.YOffset + row;
+                                int x = origin.X + glyph.BoundingBox.XOffset + col;
+                                int y = (origin.Y - glyph.BoundingBox.Height) - glyph.BoundingBox.YOffset + row;
                                 if (x >= 0 && x < size.Width && y >= 0 && y < size.Height)
                                 {
                                     result[x, y] = true;
@@ -84,15 +87,15 @@ namespace ElectricFox.BdfFontLib
                             }
                         }
                     }
-                    if (bdfChar.Geometry.DeviceWidth.HasValue)
+                    if (glyph.Geometry.DeviceSize.HasValue)
                     {
-                        origin.X += bdfChar.Geometry.DeviceWidth.Value.Width;
-                        origin.Y += bdfChar.Geometry.DeviceWidth.Value.Height;
+                        origin.X += glyph.Geometry.DeviceSize.Value.Width;
+                        origin.Y += glyph.Geometry.DeviceSize.Value.Height;
                     }
-                    else if (this.Geometry.DeviceWidth.HasValue)
+                    else if (this.Geometry.DeviceSize.HasValue)
                     {
-                        origin.X += this.Geometry.DeviceWidth.Value.Width;
-                        origin.Y += this.Geometry.DeviceWidth.Value.Height;
+                        origin.X += this.Geometry.DeviceSize.Value.Width;
+                        origin.Y += this.Geometry.DeviceSize.Value.Height;
                     }
                     else
                     {

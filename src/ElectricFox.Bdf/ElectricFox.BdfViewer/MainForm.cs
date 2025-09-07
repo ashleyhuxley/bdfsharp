@@ -12,7 +12,7 @@ namespace ElectricFox.BdfViewer
             InitializeComponent();
         }
 
-        private async void openButton_Click(object sender, EventArgs e)
+        private async void OpenButtonClick(object sender, EventArgs e)
         {
             var openDialog = new OpenFileDialog
             {
@@ -22,24 +22,20 @@ namespace ElectricFox.BdfViewer
 
             if (openDialog.ShowDialog() == DialogResult.OK)
             {
+                await LoadFont(openDialog.FileName);
+            }
+        }
+
+        private async Task LoadFont(string filename)
+        {
+            try
+            {
                 try
                 {
-                    try
-                    {
-                        loadedFont = await BdfFont.LoadAsync(openDialog.FileName);
-                        LoadCharacters();
-                    }
-                    catch (BdfLoadException ex)
-                    {
-                        MessageBox.Show(
-                            $"Error loading font: {ex.Message}",
-                            "Error",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Error
-                        );
-                    }
+                    loadedFont = await BdfFont.LoadAsync(filename);
+                    LoadCharacters();
                 }
-                catch (Exception ex)
+                catch (BdfLoadException ex)
                 {
                     MessageBox.Show(
                         $"Error loading font: {ex.Message}",
@@ -48,6 +44,15 @@ namespace ElectricFox.BdfViewer
                         MessageBoxIcon.Error
                     );
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Error loading font: {ex.Message}",
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
             }
         }
 
@@ -64,10 +69,17 @@ namespace ElectricFox.BdfViewer
                 var list = new List<ListViewItem>();
                 int i = 0;
 
-                foreach (var c in loadedFont.Chars.Values)
+                foreach (var c in loadedFont.Glyphs.Values)
                 {
                     imgList.Images.Add(GetCharacterImage(c));
-                    list.Add(new ListViewItem { Text = c.Name, ImageIndex = i++ });
+                    list.Add(
+                        new ListViewItem
+                        {
+                            Text = c.Name,
+                            ImageIndex = i++,
+                            Tag = c,
+                        }
+                    );
                 }
 
                 return (imgList, list);
@@ -119,33 +131,23 @@ namespace ElectricFox.BdfViewer
             return bmp;
         }
 
-        private void characterListView_SelectedIndexChanged(object sender, EventArgs e)
+        private void CharacterListViewSelectedIndexChanged(object sender, EventArgs e)
         {
             if (characterListView.SelectedItems.Count == 0 || loadedFont is null)
             {
                 glyphBox.Image = null;
                 return;
             }
-            var selectedItem = characterListView.SelectedItems[0];
-            var character = loadedFont.Chars.Values.FirstOrDefault(c =>
-                c.Name == selectedItem.Text
-            );
-            if (character != null)
-            {
-                glyphBox.Image = GetCharacterImage(character);
-            }
-            else
-            {
-                glyphBox.Image = null;
-            }
+
+            glyphBox.Refresh();
         }
 
-        private void previewTextbox_TextChanged(object sender, EventArgs e)
+        private void PreviewTextboxTextChanged(object sender, EventArgs e)
         {
             previewTextImage.Refresh();
         }
 
-        private void previewTextImage_Paint(object sender, PaintEventArgs e)
+        private void PreviewTextImagePaint(object sender, PaintEventArgs e)
         {
             if (loadedFont is null)
             {
@@ -155,6 +157,7 @@ namespace ElectricFox.BdfViewer
             var g = e.Graphics;
 
             var data = loadedFont.RenderBitmap(previewTextbox.Text);
+           
             for (int x = 0; x < data.GetLength(0); x++)
             {
                 for (int y = 0; y < data.GetLength(1); y++)
@@ -168,11 +171,80 @@ namespace ElectricFox.BdfViewer
                     );
                 }
             }
+
         }
 
-        private void previewLabel_Click(object sender, EventArgs e)
+        private void GlyphBoxPaint(object sender, PaintEventArgs e)
         {
+            if (characterListView.SelectedItems.Count == 0 || loadedFont is null)
+            {
+                return;
+            }
 
+            var selectedItem = characterListView.SelectedItems[0];
+            var glyph = (BdfGlyph?)selectedItem.Tag;
+
+            if (glyph is null)
+            {
+                return;
+            }
+
+            var g = e.Graphics;
+
+            Point offset = new(20, 20);
+
+            // Glyph actual size
+            for (int x = 0; x < glyph.BoundingBox.Width; x++)
+            {
+                for (int y = 0; y < glyph.BoundingBox.Height; y++)
+                {
+                    g.FillRectangle(
+                        glyph[x, y] ? Brushes.Black : Brushes.White,
+                        x + offset.X,
+                        y + offset.Y,
+                        1,
+                        1
+                    );
+                }
+            }
+
+            offset.X += glyph.BoundingBox.Width + 50;
+
+            // Glyph scaled 10x
+            for (int x = 0; x < glyph.BoundingBox.Width; x++)
+            {
+                for (int y = 0; y < glyph.BoundingBox.Height; y++)
+                {
+                    g.FillRectangle(
+                        glyph[x, y] ? Brushes.Black : Brushes.White,
+                        offset.X + (x * 10),
+                        offset.Y + (y * 10),
+                        10,
+                        10
+                    );
+                }
+            }
+
+            // Pixel Grid
+            for (int x = 0; x < glyph.BoundingBox.Width + 1; x++)
+            {
+                g.DrawLine(new Pen(Color.LightGray), offset.X + (x * 10), offset.Y, offset.X + (x * 10), offset.Y + (glyph.BoundingBox.Height * 10));
+            }
+            for (int y = 0; y < glyph.BoundingBox.Height + 1; y++)
+            {
+                g.DrawLine(new Pen(Color.LightGray), offset.X, offset.Y + (y * 10), offset.X + (glyph.BoundingBox.Width * 10), offset.Y + (y * 10));
+            }
+
+            // Origin point
+            var glyphOrigin = new Point(offset.X - (glyph.BoundingBox.XOffset * 10), offset.Y + (glyph.BoundingBox.Height * 10) + (glyph.BoundingBox.YOffset * 10));
+            g.DrawLine(new Pen(Color.Red), glyphOrigin.X - 5, glyphOrigin.Y, glyphOrigin.X + 5, glyphOrigin.Y);
+            g.DrawLine(new Pen(Color.Red), glyphOrigin.X, glyphOrigin.Y - 5, glyphOrigin.X, glyphOrigin.Y + 5);
+        }
+
+        private async void MainForm_Load(object sender, EventArgs e)
+        {
+            //await LoadFont("Z:\\Assets\\BDF Fonts\\_test.bdf");
+            await LoadFont("Z:\\Assets\\BDF Fonts\\lubI14.bdf");
         }
     }
 }

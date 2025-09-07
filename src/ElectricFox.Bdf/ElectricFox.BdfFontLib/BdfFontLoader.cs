@@ -34,10 +34,10 @@ namespace ElectricFox.BdfFontLib
 
             var geommetry = new BdfGeometry
             {
-                ScalableWidth = _SWidth,
-                DeviceWidth = _DWidth,
-                ScalableWidth1 = _SWidth1,
-                DeviceWidth1 = _DWidth1,
+                ScalableSize = _SWidth,
+                DeviceSize = _DWidth,
+                ScalableSize1 = _SWidth1,
+                DeviceSize1 = _DWidth1,
                 VVector = _VVector,
             };
 
@@ -49,9 +49,53 @@ namespace ElectricFox.BdfFontLib
                 FontBoundingBox = _fontBoundingBox ?? throw new BdfLoadException("Bounding Box was not specified"),
                 CharCount = _charCount,
                 Properties = new Dictionary<string, string>(_properties),
-                Chars = _chars.ToDictionary(c => c.Encoding),
+                Glyphs = GetUnicodeDictionary(_chars),
                 Geometry = geommetry
             };
+        }
+
+        public static IReadOnlyDictionary<int, BdfGlyph> GetUnicodeDictionary(IReadOnlyList<BdfGlyph> glyphs)
+        {
+            var unicodeMap = new Dictionary<int, BdfGlyph>();
+
+            foreach (var glyph in glyphs)
+            {
+                int? enc = glyph.Encoding;
+
+                // Case 1: encoding is a valid Unicode code point
+                if (enc is not null &&
+                    enc >= 0 && enc <= 0x10FFFF &&
+                    !(enc >= 0xD800 && enc <= 0xDFFF) && // exclude UTF-16 surrogate range
+                    !(enc == 0xFFFE || enc == 0xFFFF))   // exclude non-characters
+                {
+                    unicodeMap[enc.Value] = glyph;
+                    continue;
+                }
+
+                // Case 2: Try to parse STARTCHAR
+                if (!string.IsNullOrEmpty(glyph.Name))
+                {
+                    if (glyph.Name.Length == 1)
+                    {
+                        // e.g. STARTCHAR A
+                        unicodeMap[glyph.Name[0]] = glyph;
+                    }
+                    else if (glyph.Name.StartsWith("uni", StringComparison.OrdinalIgnoreCase) &&
+                             int.TryParse(glyph.Name.Substring(3), System.Globalization.NumberStyles.HexNumber, null, out int uniCode))
+                    {
+                        // e.g. STARTCHAR uni20AC
+                        unicodeMap[uniCode] = glyph;
+                    }
+                    else if (glyph.Name.StartsWith("U+", StringComparison.OrdinalIgnoreCase) &&
+                             int.TryParse(glyph.Name.Substring(2), System.Globalization.NumberStyles.HexNumber, null, out int uniCode2))
+                    {
+                        // e.g. STARTCHAR U+0041
+                        unicodeMap[uniCode2] = glyph;
+                    }
+                }
+            }
+
+            return unicodeMap;
         }
 
         private async Task FillPipeAsync(FileStream stream, PipeWriter writer)

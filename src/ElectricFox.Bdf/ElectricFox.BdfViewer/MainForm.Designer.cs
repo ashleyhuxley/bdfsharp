@@ -45,13 +45,13 @@
             // 
             // openButton
             // 
-            openButton.Location = new Point(582, 12);
+            openButton.Location = new Point(572, 436);
             openButton.Name = "openButton";
             openButton.Size = new Size(133, 23);
             openButton.TabIndex = 0;
             openButton.Text = "Open Font...";
             openButton.UseVisualStyleBackColor = true;
-            openButton.Click += openButton_Click;
+            openButton.Click += OpenButtonClick;
             // 
             // characterListView
             // 
@@ -61,45 +61,45 @@
             characterListView.Size = new Size(432, 922);
             characterListView.TabIndex = 1;
             characterListView.UseCompatibleStateImageBehavior = false;
-            characterListView.SelectedIndexChanged += characterListView_SelectedIndexChanged;
+            characterListView.SelectedIndexChanged += CharacterListViewSelectedIndexChanged;
             // 
             // glyphBox
             // 
             glyphBox.BackColor = Color.White;
             glyphBox.Location = new Point(3, 3);
             glyphBox.Name = "glyphBox";
-            glyphBox.Size = new Size(563, 173);
+            glyphBox.Size = new Size(759, 316);
             glyphBox.TabIndex = 2;
             glyphBox.TabStop = false;
+            glyphBox.Paint += GlyphBoxPaint;
             // 
             // previewTextbox
             // 
-            previewTextbox.Location = new Point(13, 244);
+            previewTextbox.Location = new Point(21, 436);
             previewTextbox.Name = "previewTextbox";
             previewTextbox.Size = new Size(393, 23);
             previewTextbox.TabIndex = 3;
-            previewTextbox.TextChanged += previewTextbox_TextChanged;
+            previewTextbox.TextChanged += PreviewTextboxTextChanged;
             // 
             // previewLabel
             // 
             previewLabel.AutoSize = true;
-            previewLabel.Location = new Point(13, 216);
+            previewLabel.Location = new Point(21, 408);
             previewLabel.Name = "previewLabel";
             previewLabel.Size = new Size(75, 15);
             previewLabel.TabIndex = 4;
             previewLabel.Text = "Preview Text:";
-            previewLabel.Click += previewLabel_Click;
             // 
             // previewTextImage
             // 
             previewTextImage.BackColor = Color.White;
             previewTextImage.Dock = DockStyle.Bottom;
-            previewTextImage.Location = new Point(0, 289);
+            previewTextImage.Location = new Point(0, 480);
             previewTextImage.Name = "previewTextImage";
-            previewTextImage.Size = new Size(861, 633);
+            previewTextImage.Size = new Size(861, 442);
             previewTextImage.TabIndex = 5;
             previewTextImage.TabStop = false;
-            previewTextImage.Paint += previewTextImage_Paint;
+            previewTextImage.Paint += PreviewTextImagePaint;
             // 
             // splitContainer1
             // 
@@ -130,6 +130,7 @@
             Controls.Add(splitContainer1);
             Name = "MainForm";
             Text = "BDF Font Viewer";
+            Load += MainForm_Load;
             ((System.ComponentModel.ISupportInitialize)glyphBox).EndInit();
             ((System.ComponentModel.ISupportInitialize)previewTextImage).EndInit();
             splitContainer1.Panel1.ResumeLayout(false);

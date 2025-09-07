@@ -4,13 +4,10 @@
     {
         private bool isReadingBitmap;
 
-        private static List<int> usedEncodingValues = new();
-
-        private string _name;
-        private int _encoding = -1;
-        private int _encodingNonstandard = -1;
+        private readonly string _name;
+        private int? _encoding = default;
         private BdfBoundingBox? _CBB;
-        private List<byte[]> bytes = new();
+        private readonly List<byte[]> bytes = [];
 
         public BdfCharacterLoader(string name)
         {
@@ -19,18 +16,6 @@
 
         public BdfGlyph GetCharacter()
         {
-            int encoding;
-            if (_encoding == -1 || usedEncodingValues.Contains(_encoding))
-            {
-                encoding = usedEncodingValues.Count > 0 ? usedEncodingValues.Max() + 1 : 0;
-            }
-            else
-            {
-                encoding = _encoding;
-            }
-
-            usedEncodingValues.Add(encoding);
-
             if (_CBB == null)
             {
                 throw new BdfLoadException("Character missing BBX");
@@ -38,16 +23,16 @@
 
             var geommetry = new BdfGeometry
             {
-                ScalableWidth = _SWidth,
-                DeviceWidth = _DWidth,
-                ScalableWidth1 = _SWidth1,
-                DeviceWidth1 = _DWidth1,
+                ScalableSize = _SWidth,
+                DeviceSize = _DWidth,
+                ScalableSize1 = _SWidth1,
+                DeviceSize1 = _DWidth1,
                 VVector = _VVector,
             };
 
             return new BdfGlyph(
                 _name,
-                encoding,
+                _encoding,
                 ParseBooleanData(bytes))
             {
                 Geometry = geommetry,
@@ -128,9 +113,9 @@
                         return true;
                     case "ENCODING":
                         CheckAttributeLength(1, attributeCount, command);
-                        if (!int.TryParse(values[1], out _encoding))
+                        if (int.TryParse(values[1], out var encoding))
                         {
-                            throw new BdfLoadException("Invalid ENCODING value");
+                            _encoding = encoding;
                         }
                         break;
                     case "BBX":
