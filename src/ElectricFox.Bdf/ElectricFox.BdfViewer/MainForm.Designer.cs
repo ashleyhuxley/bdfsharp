@@ -35,17 +35,22 @@
             previewLabel = new Label();
             previewTextImage = new PictureBox();
             splitContainer1 = new SplitContainer();
+            sizeGroupBox = new GroupBox();
+            size10Xradio = new RadioButton();
+            size2Xradio = new RadioButton();
+            size1Xradio = new RadioButton();
             ((System.ComponentModel.ISupportInitialize)glyphBox).BeginInit();
             ((System.ComponentModel.ISupportInitialize)previewTextImage).BeginInit();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
             splitContainer1.SuspendLayout();
+            sizeGroupBox.SuspendLayout();
             SuspendLayout();
             // 
             // openButton
             // 
-            openButton.Location = new Point(572, 436);
+            openButton.Location = new Point(21, 358);
             openButton.Name = "openButton";
             openButton.Size = new Size(133, 23);
             openButton.TabIndex = 0;
@@ -113,6 +118,7 @@
             // 
             // splitContainer1.Panel2
             // 
+            splitContainer1.Panel2.Controls.Add(sizeGroupBox);
             splitContainer1.Panel2.Controls.Add(previewTextImage);
             splitContainer1.Panel2.Controls.Add(openButton);
             splitContainer1.Panel2.Controls.Add(glyphBox);
@@ -121,6 +127,53 @@
             splitContainer1.Size = new Size(1297, 922);
             splitContainer1.SplitterDistance = 432;
             splitContainer1.TabIndex = 6;
+            // 
+            // sizeGroupBox
+            // 
+            sizeGroupBox.Controls.Add(size10Xradio);
+            sizeGroupBox.Controls.Add(size2Xradio);
+            sizeGroupBox.Controls.Add(size1Xradio);
+            sizeGroupBox.Location = new Point(437, 399);
+            sizeGroupBox.Name = "sizeGroupBox";
+            sizeGroupBox.Size = new Size(189, 60);
+            sizeGroupBox.TabIndex = 6;
+            sizeGroupBox.TabStop = false;
+            sizeGroupBox.Text = "Preview Size";
+            // 
+            // size10Xradio
+            // 
+            size10Xradio.AutoSize = true;
+            size10Xradio.Location = new Point(124, 28);
+            size10Xradio.Name = "size10Xradio";
+            size10Xradio.Size = new Size(44, 19);
+            size10Xradio.TabIndex = 2;
+            size10Xradio.Text = "10X";
+            size10Xradio.UseVisualStyleBackColor = true;
+            size10Xradio.CheckedChanged += SizeRadioCheckedChanged;
+            // 
+            // size2Xradio
+            // 
+            size2Xradio.AutoSize = true;
+            size2Xradio.Location = new Point(64, 28);
+            size2Xradio.Name = "size2Xradio";
+            size2Xradio.Size = new Size(38, 19);
+            size2Xradio.TabIndex = 1;
+            size2Xradio.Text = "2X";
+            size2Xradio.UseVisualStyleBackColor = true;
+            size2Xradio.CheckedChanged += SizeRadioCheckedChanged;
+            // 
+            // size1Xradio
+            // 
+            size1Xradio.AutoSize = true;
+            size1Xradio.Checked = true;
+            size1Xradio.Location = new Point(6, 28);
+            size1Xradio.Name = "size1Xradio";
+            size1Xradio.Size = new Size(38, 19);
+            size1Xradio.TabIndex = 0;
+            size1Xradio.TabStop = true;
+            size1Xradio.Text = "1X";
+            size1Xradio.UseVisualStyleBackColor = true;
+            size1Xradio.CheckedChanged += SizeRadioCheckedChanged;
             // 
             // MainForm
             // 
@@ -138,6 +191,8 @@
             splitContainer1.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
             splitContainer1.ResumeLayout(false);
+            sizeGroupBox.ResumeLayout(false);
+            sizeGroupBox.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -150,5 +205,9 @@
         private Label previewLabel;
         private PictureBox previewTextImage;
         private SplitContainer splitContainer1;
+        private GroupBox sizeGroupBox;
+        private RadioButton size2Xradio;
+        private RadioButton size1Xradio;
+        private RadioButton size10Xradio;
     }
 }

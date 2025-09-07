@@ -1,5 +1,4 @@
 ﻿using System.Buffers;
-using System.Drawing;
 using System.IO.Pipelines;
 using System.Text;
 
@@ -43,7 +42,7 @@ namespace ElectricFox.BdfFontLib
 
             return new BdfFont
             {
-                FontName = _fontName ?? throw new BdfLoadException("Font name was not specified"),
+                FontName = _fontName ?? string.Empty,
                 Version = _version ?? string.Empty,
                 Size = _size ?? throw new BdfLoadException("SIZE was not specified"),
                 FontBoundingBox = _fontBoundingBox ?? throw new BdfLoadException("Bounding Box was not specified"),
@@ -73,10 +72,10 @@ namespace ElectricFox.BdfFontLib
                     // Tell the PipeWriter how much was read from the Socket.
                     writer.Advance(bytesRead);
                 }
-                catch (Exception ex)
+                catch
                 {
-                    //LogError(ex);
                     break;
+                    throw;
                 }
 
                 // Make the data available to the PipeReader.

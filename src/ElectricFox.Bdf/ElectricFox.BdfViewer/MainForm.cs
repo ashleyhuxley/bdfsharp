@@ -157,19 +157,48 @@ namespace ElectricFox.BdfViewer
             var g = e.Graphics;
 
             var data = loadedFont.RenderBitmap(previewTextbox.Text);
-           
+
+            var size = 1;
+            if (size2Xradio.Checked)
+            {
+                size = 2;
+            }
+            if (size10Xradio.Checked)
+            {
+                size = 10;
+            }
+
             for (int x = 0; x < data.GetLength(0); x++)
             {
                 for (int y = 0; y < data.GetLength(1); y++)
                 {
                     g.FillRectangle(
                         data[x, y] ? Brushes.Black : Brushes.White,
-                        x + 20,
-                        y + 20,
-                        1,
-                        1
+                        (size * x) + 20,
+                        (size * y) + 20,
+                        size,
+                        size
                     );
                 }
+            }
+
+            if (size10Xradio.Checked)
+            {
+                var rect = loadedFont.MeasureString(previewTextbox.Text);
+
+                for (int x = 0; x <= data.GetLength(0); x++)
+                {
+                    g.DrawLine(new Pen(Color.LightGray), (size * x) + 20, 20, (size * x) + 20, (size * data.GetLength(1)) + 20);
+                }
+                for (int y = 0; y <= data.GetLength(1); y++)
+                {
+                    g.DrawLine(new Pen(Color.LightGray), 20, (size * y) + 20, (size * data.GetLength(0)) + 20, (size * y) + 20);
+                }
+
+                var origin = new Point(20 + (0 - (rect.X * size)), 20 + (0 - (rect.Y * size)));
+
+                g.DrawLine(new Pen(Color.Red), origin.X - 5, origin.Y, origin.X + 5, origin.Y);
+                g.DrawLine(new Pen(Color.Red), origin.X, origin.Y - 5, origin.X, origin.Y + 5);
             }
 
         }
@@ -245,6 +274,14 @@ namespace ElectricFox.BdfViewer
         {
             //await LoadFont("Z:\\Assets\\BDF Fonts\\_test.bdf");
             await LoadFont("Z:\\Assets\\BDF Fonts\\lubI14.bdf");
+        }
+
+        private void SizeRadioCheckedChanged(object sender, EventArgs e)
+        {
+            if (sender is RadioButton rb && rb.Checked)
+            {
+                previewTextImage.Refresh();
+            }
         }
     }
 }

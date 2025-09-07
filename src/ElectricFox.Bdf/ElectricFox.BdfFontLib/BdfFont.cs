@@ -26,7 +26,7 @@ namespace ElectricFox.BdfFontLib
         /// <returns>A rectangle whose origin (0, 0) is the baseline of the starting character</returns>
         public Rectangle MeasureString(string text)
         {
-            return MeasureString(text.Select(c => (int)c));
+            return MeasureString(text.EnumerateRunes().Select(r => r.Value));
         }
 
         /// <summary>
@@ -51,15 +51,16 @@ namespace ElectricFox.BdfFontLib
 
                 if (glyph != null)
                 {
-                    minX = Math.Min(minX, origin.X - glyph.BoundingBox.XOffset);
+                    minX = Math.Min(minX, origin.X + glyph.BoundingBox.XOffset);
                     maxX = Math.Max(
                         maxX,
                         origin.X + glyph.BoundingBox.XOffset + glyph.BoundingBox.Width
                     );
 
                     // Y axis is reversed
-                    minY = Math.Min(minY, origin.Y - glyph.BoundingBox.Height);
-                    maxY = Math.Max(maxY, origin.Y - glyph.BoundingBox.YOffset);
+                    var yOffset = origin.Y - (glyph.BoundingBox.Height + glyph.BoundingBox.YOffset);
+                    minY = Math.Min(minY, yOffset);
+                    maxY = Math.Max(maxY, yOffset + glyph.BoundingBox.Height);
 
                     if (glyph.Geometry.DeviceSize.HasValue)
                     {
@@ -150,7 +151,7 @@ namespace ElectricFox.BdfFontLib
         /// <exception cref="InvalidOperationException">The glyph or font must have Device dimensions specified (DWIDTH). If neither of these are present, an exception is thrown.</exception>
         public bool[,] RenderBitmap(string text)
         {
-            return RenderBitmap(text.Select(c => (int)c), GlyphLookupOption.BestGuess);
+            return RenderBitmap(text.EnumerateRunes().Select(r => r.Value));
         }
 
         private BdfGlyph? LookupGlyph(int value, GlyphLookupOption option)
