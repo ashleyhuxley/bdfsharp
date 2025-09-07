@@ -1,10 +1,10 @@
 ﻿namespace ElectricFox.BdfFontLib
 {
-    public class BdfChar
+    public class BdfGlyph
     {
         private bool[,] _data;
 
-        public BdfChar(string name, int encoding, bool[,] data)
+        public BdfGlyph(string name, int encoding, bool[,] data)
         {
             Name = name;
             Encoding = encoding;

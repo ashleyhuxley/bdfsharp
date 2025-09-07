@@ -17,7 +17,7 @@
             _name = name;
         }
 
-        public BdfChar GetCharacter()
+        public BdfGlyph GetCharacter()
         {
             int encoding;
             if (_encoding == -1 || usedEncodingValues.Contains(_encoding))
@@ -45,7 +45,7 @@
                 VVector = _VVector,
             };
 
-            return new BdfChar(
+            return new BdfGlyph(
                 _name,
                 encoding,
                 ParseBooleanData(bytes))

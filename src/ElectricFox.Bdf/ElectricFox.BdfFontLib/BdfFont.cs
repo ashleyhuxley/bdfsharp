@@ -10,7 +10,7 @@ namespace ElectricFox.BdfFontLib
         public required BdfBoundingBox FontBoundingBox { get; init; }
         public required int CharCount { get; init; }
         public required Dictionary<string, string> Properties { get; init; }
-        public required IReadOnlyDictionary<int, BdfChar> Chars { get; init; }
+        public required IReadOnlyDictionary<int, BdfGlyph> Chars { get; init; }
         public required BdfGeometry Geometry { get; init; }
 
         public static async Task<BdfFont> LoadAsync(string fileName)
@@ -32,7 +32,7 @@ namespace ElectricFox.BdfFontLib
 
             foreach (int c in values)
             {
-                if (Chars.TryGetValue(c, out BdfChar? bdfChar))
+                if (Chars.TryGetValue(c, out BdfGlyph? bdfChar))
                 {
                     minX = Math.Min(minX, origin.X + bdfChar.BoundingBox.XOffset);
                     minY = Math.Min(minY, origin.Y + bdfChar.BoundingBox.YOffset);
@@ -67,7 +67,7 @@ namespace ElectricFox.BdfFontLib
             Point origin = new(0, 0);
             foreach (char c in text)
             {
-                if (Chars.TryGetValue((int)c, out BdfChar? bdfChar))
+                if (Chars.TryGetValue((int)c, out BdfGlyph? bdfChar))
                 {
                     for (int row = 0; row < bdfChar.BoundingBox.Height; row++)
                     {

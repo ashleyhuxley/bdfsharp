@@ -80,7 +80,7 @@ namespace ElectricFox.BdfViewer
             characterListView.EndUpdate();
         }
 
-        private Bitmap GetCharacterImage(BdfChar c)
+        private Bitmap GetCharacterImage(BdfGlyph c)
         {
             int width = Math.Max(c.BoundingBox.Width, 16);
             int height = Math.Max(c.BoundingBox.Height, 16);

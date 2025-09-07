@@ -17,7 +17,7 @@ namespace ElectricFox.BdfFontLib
         private BdfBoundingBox? _fontBoundingBox;
         private int _charCount;
         private readonly Dictionary<string, string> _properties = new();
-        private List<BdfChar> _chars = new();
+        private List<BdfGlyph> _chars = new();
 
         public async Task<BdfFont> LoadAsync(string filePath)
         {
