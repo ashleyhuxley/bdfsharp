@@ -1,4 +1,4 @@
-﻿namespace ElectricFox.BdfFontLib
+﻿namespace ElectricFox.BdfSharp
 {
     internal class BdfCharacterLoader : BdfLoader
     {

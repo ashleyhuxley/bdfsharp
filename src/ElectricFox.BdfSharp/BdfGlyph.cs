@@ -1,4 +1,4 @@
-﻿namespace ElectricFox.BdfFontLib
+﻿namespace ElectricFox.BdfSharp
 {
     public class BdfGlyph
     {

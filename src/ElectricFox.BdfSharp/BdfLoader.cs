@@ -1,7 +1,7 @@
 ﻿using System.Drawing;
 using System.Numerics;
 
-namespace ElectricFox.BdfFontLib
+namespace ElectricFox.BdfSharp
 {
     public class BdfLoader
     {

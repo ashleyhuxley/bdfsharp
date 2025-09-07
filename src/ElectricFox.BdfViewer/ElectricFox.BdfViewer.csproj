@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ElectricFox.BdfFontLib\ElectricFox.BdfFontLib.csproj" />
+    <ProjectReference Include="..\ElectricFox.BdfSharp\ElectricFox.BdfSharp.csproj" />
   </ItemGroup>
 
 </Project>

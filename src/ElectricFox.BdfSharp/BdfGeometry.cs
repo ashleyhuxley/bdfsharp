@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace ElectricFox.BdfFontLib
+namespace ElectricFox.BdfSharp
 {
     public sealed class BdfGeometry
     {

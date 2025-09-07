@@ -5,7 +5,7 @@ VisualStudioVersion = 17.14.36221.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElectricFox.BdfViewer", "ElectricFox.BdfViewer\ElectricFox.BdfViewer.csproj", "{1D559385-97B9-4E23-A637-94CB753F43E1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElectricFox.BdfFontLib", "ElectricFox.BdfFontLib\ElectricFox.BdfFontLib.csproj", "{BCB34908-8857-4E56-BF8E-F383DAE3EFC8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElectricFox.BdfSharp", "ElectricFox.BdfSharp\ElectricFox.BdfSharp.csproj", "{BCB34908-8857-4E56-BF8E-F383DAE3EFC8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

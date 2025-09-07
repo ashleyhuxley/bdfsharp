@@ -2,7 +2,7 @@
 using System.IO.Pipelines;
 using System.Text;
 
-namespace ElectricFox.BdfFontLib
+namespace ElectricFox.BdfSharp
 {
     internal class BdfFontLoader : BdfLoader
     {
