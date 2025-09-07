@@ -12,20 +12,6 @@ namespace ElectricFox.BdfViewer
             InitializeComponent();
         }
 
-        private async void OpenButtonClick(object sender, EventArgs e)
-        {
-            var openDialog = new OpenFileDialog
-            {
-                Filter = "BDF Fonts (*.bdf)|*.bdf|All Files (*.*)|*.*",
-                Title = "Open BDF Font",
-            };
-
-            if (openDialog.ShowDialog() == DialogResult.OK)
-            {
-                await LoadFont(openDialog.FileName);
-            }
-        }
-
         private async Task LoadFont(string filename)
         {
             try
@@ -33,7 +19,8 @@ namespace ElectricFox.BdfViewer
                 try
                 {
                     loadedFont = await BdfFont.LoadAsync(filename);
-                    LoadCharacters();
+                    LoadGlyphs();
+                    LoadInformation();
                 }
                 catch (BdfLoadException ex)
                 {
@@ -56,7 +43,34 @@ namespace ElectricFox.BdfViewer
             }
         }
 
-        private async void LoadCharacters()
+        private void LoadInformation()
+        {
+            fontNameTextbox.Text = loadedFont?.FontName ?? string.Empty;
+            versionTextbox.Text = loadedFont?.Version ?? string.Empty;
+            glyphsTextbox.Text = loadedFont?.CharCount.ToString() ?? string.Empty;
+        }
+
+        private void LoadGlyphInformation()
+        {
+            if (characterListView.SelectedItems.Count > 0)
+            {
+                var selectedItem = characterListView.SelectedItems[0];
+                var glyph = (BdfGlyph?)selectedItem.Tag;
+
+                if (glyph is not null)
+                {
+                    glyphNameTextbox.Text = glyph.Name;
+                    glyphEncodingTextbox.Text = glyph.Encoding.ToString();
+                    return;
+                }
+            }
+
+            glyphNameTextbox.Text = string.Empty;
+            glyphEncodingTextbox.Text = string.Empty;
+            return;
+        }
+
+        private async void LoadGlyphs()
         {
             if (loadedFont is null)
             {
@@ -71,7 +85,7 @@ namespace ElectricFox.BdfViewer
 
                 foreach (var c in loadedFont.Glyphs)
                 {
-                    imgList.Images.Add(GetCharacterImage(c));
+                    imgList.Images.Add(GetGlyphImage(c));
                     list.Add(
                         new ListViewItem
                         {
@@ -92,7 +106,7 @@ namespace ElectricFox.BdfViewer
             characterListView.EndUpdate();
         }
 
-        private Bitmap GetCharacterImage(BdfGlyph c)
+        private Bitmap GetGlyphImage(BdfGlyph c)
         {
             int width = Math.Max(c.BoundingBox.Width, 16);
             int height = Math.Max(c.BoundingBox.Height, 16);
@@ -133,6 +147,8 @@ namespace ElectricFox.BdfViewer
 
         private void CharacterListViewSelectedIndexChanged(object sender, EventArgs e)
         {
+            LoadGlyphInformation();
+
             if (characterListView.SelectedItems.Count == 0 || loadedFont is null)
             {
                 glyphBox.Image = null;
@@ -222,23 +238,6 @@ namespace ElectricFox.BdfViewer
 
             Point offset = new(20, 20);
 
-            // Glyph actual size
-            for (int x = 0; x < glyph.BoundingBox.Width; x++)
-            {
-                for (int y = 0; y < glyph.BoundingBox.Height; y++)
-                {
-                    g.FillRectangle(
-                        glyph[x, y] ? Brushes.Black : Brushes.White,
-                        x + offset.X,
-                        y + offset.Y,
-                        1,
-                        1
-                    );
-                }
-            }
-
-            offset.X += glyph.BoundingBox.Width + 50;
-
             // Glyph scaled 10x
             for (int x = 0; x < glyph.BoundingBox.Width; x++)
             {
@@ -270,17 +269,25 @@ namespace ElectricFox.BdfViewer
             g.DrawLine(new Pen(Color.Red), glyphOrigin.X, glyphOrigin.Y - 5, glyphOrigin.X, glyphOrigin.Y + 5);
         }
 
-        private async void MainForm_Load(object sender, EventArgs e)
-        {
-            //await LoadFont("Z:\\Assets\\BDF Fonts\\_test.bdf");
-            await LoadFont("Z:\\Assets\\BDF Fonts\\lubI14.bdf");
-        }
-
         private void SizeRadioCheckedChanged(object sender, EventArgs e)
         {
             if (sender is RadioButton rb && rb.Checked)
             {
                 previewTextImage.Refresh();
+            }
+        }
+
+        private async void OpenButtonClick(object sender, EventArgs e)
+        {
+            var openDialog = new OpenFileDialog
+            {
+                Filter = "BDF Fonts (*.bdf)|*.bdf|All Files (*.*)|*.*",
+                Title = "Open BDF Font",
+            };
+
+            if (openDialog.ShowDialog() == DialogResult.OK)
+            {
+                await LoadFont(openDialog.FileName);
             }
         }
     }
