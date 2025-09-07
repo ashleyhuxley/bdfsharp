@@ -69,7 +69,7 @@ namespace ElectricFox.BdfViewer
                 var list = new List<ListViewItem>();
                 int i = 0;
 
-                foreach (var c in loadedFont.Glyphs.Values)
+                foreach (var c in loadedFont.Glyphs)
                 {
                     imgList.Images.Add(GetCharacterImage(c));
                     list.Add(
