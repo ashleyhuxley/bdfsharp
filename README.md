@@ -1,4 +1,4 @@
-# C# BDF Font Loader and Renderer
+# ElectricFox.BdfSharp - C# BDF Font Loader and Renderer
 
 ## Introduction
 
