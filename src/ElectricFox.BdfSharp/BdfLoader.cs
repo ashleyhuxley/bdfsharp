@@ -1,9 +1,8 @@
 ﻿using System.Drawing;
-using System.Numerics;
 
 namespace ElectricFox.BdfSharp
 {
-    public class BdfLoader
+    internal abstract class BdfLoader
     {
         protected Size? _SWidth;
         protected Size? _DWidth;
@@ -11,7 +10,7 @@ namespace ElectricFox.BdfSharp
         protected Size? _DWidth1;
         protected Point? _VVector;
 
-        protected void CheckAttributeLength(int expected, int actual, string command)
+        protected static void CheckAttributeLength(int expected, int actual, string command)
         {
             if (expected > actual)
             {
@@ -19,7 +18,7 @@ namespace ElectricFox.BdfSharp
             }
         }
 
-        protected Point ParsePoint(string val1, string val2, string command)
+        protected static Point ParsePoint(string val1, string val2, string command)
         {
             if (!int.TryParse(val1, out int x))
             {
@@ -34,7 +33,7 @@ namespace ElectricFox.BdfSharp
             return new Point(x, y);
         }
 
-        protected Size ParseSize(string val1, string val2, string command)
+        protected static Size ParseSize(string val1, string val2, string command)
         {
             if (!int.TryParse(val1, out int x))
             {

@@ -47,7 +47,7 @@ namespace ElectricFox.BdfViewer
         {
             fontNameTextbox.Text = loadedFont?.FontName ?? string.Empty;
             versionTextbox.Text = loadedFont?.Version ?? string.Empty;
-            glyphsTextbox.Text = loadedFont?.CharCount.ToString() ?? string.Empty;
+            glyphsTextbox.Text = loadedFont?.GlyphCount.ToString() ?? string.Empty;
         }
 
         private void LoadGlyphInformation()

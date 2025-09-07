@@ -1,6 +1,6 @@
 ﻿namespace ElectricFox.BdfSharp
 {
-    public class BdfBoundingBox
+    public sealed class BdfBoundingBox
     {
         public int Width { get; internal set; }
         public int Height { get; internal set; }
@@ -16,7 +16,7 @@
         {
             if (!int.TryParse(width, out int w))
             {
-                throw new BdfLoadException("Invalid width size in FONTBOUNDINGBOX specification");
+                throw new BdfLoadException("Invalid width in FONTBOUNDINGBOX specification");
             }
 
             if (!int.TryParse(height, out int h))

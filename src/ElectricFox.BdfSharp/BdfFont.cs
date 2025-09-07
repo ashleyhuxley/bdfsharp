@@ -2,15 +2,51 @@
 
 namespace ElectricFox.BdfSharp
 {
-    public class BdfFont
+    public sealed class BdfFont
     {
+        /// <summary>
+        /// The name of the font as specified in the BDF file
+        /// </summary>
         public required string FontName { get; init; }
+
+        /// <summary>
+        /// The version of the BDF file format used
+        /// </summary>
         public required string Version { get; init; }
-        public required BdfSize Size { get; init; }
+
+        /// <summary>
+        /// The point size of the font
+        /// </summary>
+        public required int PointSize { get; init; }
+
+        /// <summary>
+        /// The device resolution this font was intended for
+        /// </summary>
+        public required Size IntendedResolution { get; init; }
+
+        /// <summary>
+        /// The bounding box for the font
+        /// </summary>
         public required BdfBoundingBox FontBoundingBox { get; init; }
-        public required int CharCount { get; init; }
+
+        /// <summary>
+        /// Gets the number of glyphs in the font
+        /// </summary>
+        public required int GlyphCount { get; init; }
+
+        /// <summary>
+        /// A dictionary of additional properties specified in the BDF file
+        /// </summary>
         public required Dictionary<string, string> Properties { get; init; }
+
+        /// <summary>
+        /// Gets the collection of glyphs defined in the font.
+        /// </summary>
         public required IReadOnlyList<BdfGlyph> Glyphs { get; init; }
+
+        /// <summary>
+        /// Gets the geometry data associated with the font.
+        /// </summary>
         public required BdfGeometry Geometry { get; init; }
 
         public static async Task<BdfFont> LoadAsync(string fileName)

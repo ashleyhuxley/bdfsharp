@@ -1,6 +1,6 @@
 ﻿namespace ElectricFox.BdfSharp
 {
-    public class BdfGlyph
+    public sealed class BdfGlyph
     {
         private bool[,] _data;
 

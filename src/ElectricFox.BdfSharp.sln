@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElectricFox.BdfViewer", "El
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElectricFox.BdfSharp", "ElectricFox.BdfSharp\ElectricFox.BdfSharp.csproj", "{BCB34908-8857-4E56-BF8E-F383DAE3EFC8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElectricFox.BdfSharp.UnitTests", "ElectricFox.BdfSharp.UnitTests\ElectricFox.BdfSharp.UnitTests.csproj", "{E175C2A7-EA2E-4049-A1CC-B9ABF357426A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{BCB34908-8857-4E56-BF8E-F383DAE3EFC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BCB34908-8857-4E56-BF8E-F383DAE3EFC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BCB34908-8857-4E56-BF8E-F383DAE3EFC8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E175C2A7-EA2E-4049-A1CC-B9ABF357426A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E175C2A7-EA2E-4049-A1CC-B9ABF357426A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E175C2A7-EA2E-4049-A1CC-B9ABF357426A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E175C2A7-EA2E-4049-A1CC-B9ABF357426A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,6 +1,6 @@
 ﻿namespace ElectricFox.BdfSharp
 {
-    internal class BdfCharacterLoader : BdfLoader
+    internal sealed class BdfGlyphLoader : BdfLoader
     {
         private bool isReadingBitmap;
 
@@ -9,16 +9,16 @@
         private BdfBoundingBox? _CBB;
         private readonly List<byte[]> bytes = [];
 
-        public BdfCharacterLoader(string name)
+        public BdfGlyphLoader(string name)
         {
             _name = name;
         }
 
-        public BdfGlyph GetCharacter()
+        public BdfGlyph GetGlyph()
         {
             if (_CBB == null)
             {
-                throw new BdfLoadException("Character missing BBX");
+                throw new BdfLoadException($"Glyph '{_name}' missing BBX");
             }
 
             var geommetry = new BdfGeometry
@@ -33,22 +33,17 @@
             return new BdfGlyph(
                 _name,
                 _encoding,
-                ParseBooleanData(bytes))
+                ParseBooleanData(bytes, _CBB))
             {
                 Geometry = geommetry,
-                BoundingBox = _CBB ?? throw new BdfLoadException($"BBX value not found on character {_name}")
+                BoundingBox = _CBB
             };
         }
 
-        private bool[,] ParseBooleanData(List<byte[]> data)
+        private static bool[,] ParseBooleanData(List<byte[]> data, BdfBoundingBox boundingBox)
         {
-            if (_CBB == null)
-            {
-                throw new BdfLoadException("Character missing BBX");
-            }
-
-            int rows = _CBB.Height;
-            int cols = _CBB.Width;
+            int rows = boundingBox.Height;
+            int cols = boundingBox.Width;
 
             bool[,] result = new bool[cols, rows];
 
@@ -79,7 +74,7 @@
             return result;
         }
 
-        public bool ParseCharacter(string line)
+        public bool ProcessLine(string line)
         {
             if (isReadingBitmap)
             {

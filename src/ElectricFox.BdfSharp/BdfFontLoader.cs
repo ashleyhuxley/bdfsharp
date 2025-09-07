@@ -1,18 +1,20 @@
 ﻿using System.Buffers;
+using System.Drawing;
 using System.IO.Pipelines;
 using System.Text;
 
 namespace ElectricFox.BdfSharp
 {
-    internal class BdfFontLoader : BdfLoader
+    internal sealed class BdfFontLoader : BdfLoader
     {
-        private BdfCharacterLoader? currentChar = null;
+        private BdfGlyphLoader? currentChar = null;
 
         private bool isReadingProperties;
 
         private string? _fontName;
         private string? _version;
-        private BdfSize? _size;
+        private int _pointSize;
+        private Size? _resolution;
         private BdfBoundingBox? _fontBoundingBox;
         private int _charCount;
         private readonly Dictionary<string, string> _properties = new();
@@ -44,12 +46,13 @@ namespace ElectricFox.BdfSharp
             {
                 FontName = _fontName ?? string.Empty,
                 Version = _version ?? string.Empty,
-                Size = _size ?? throw new BdfLoadException("SIZE was not specified"),
+                IntendedResolution = _resolution ?? throw new BdfLoadException("SIZE was not specified"),
                 FontBoundingBox = _fontBoundingBox ?? throw new BdfLoadException("Bounding Box was not specified"),
-                CharCount = _charCount,
+                GlyphCount = _charCount,
                 Properties = new Dictionary<string, string>(_properties),
                 Glyphs = _chars,
-                Geometry = geommetry
+                Geometry = geommetry,
+                PointSize = _pointSize,
             };
         }
 
@@ -175,10 +178,10 @@ namespace ElectricFox.BdfSharp
 
             if (currentChar is not null)
             {
-                var complete = currentChar.ParseCharacter(lineString);
+                var complete = currentChar.ProcessLine(lineString);
                 if (complete)
                 {
-                    _chars.Add(currentChar.GetCharacter());
+                    _chars.Add(currentChar.GetGlyph());
                     currentChar = null;
                 }
                 return;
@@ -219,7 +222,7 @@ namespace ElectricFox.BdfSharp
                         break;
                     case "STARTCHAR":
                         CheckAttributeLength(1, attributeCount, command);
-                        currentChar = new BdfCharacterLoader(values[1]);
+                        currentChar = new BdfGlyphLoader(values[1]);
                         break;
                     case "FONT":
                         CheckAttributeLength(1, attributeCount, command);
@@ -227,7 +230,8 @@ namespace ElectricFox.BdfSharp
                         break;
                     case "SIZE":
                         CheckAttributeLength(3, attributeCount, command);
-                        _size = BdfSize.Parse(values[1], values[2], values[3]);
+                        _resolution = ParseSize(values[2], values[3], command);
+                        _pointSize = int.Parse(values[1]);
                         break;
                     case "FONTBOUNDINGBOX":
                         CheckAttributeLength(4, attributeCount, command);
