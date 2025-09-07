@@ -169,5 +169,10 @@ namespace ElectricFox.BdfViewer
                 }
             }
         }
+
+        private void previewLabel_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
