@@ -174,7 +174,7 @@ namespace ElectricFox.BdfSharp
         private void ProcessLine(ReadOnlySequence<byte> line)
         {
             // Convert the line to a string and process it.
-            var lineString = Encoding.UTF8.GetString(line.ToArray());
+            var lineString = Encoding.UTF8.GetString(line.ToArray()).Trim();
 
             if (currentChar is not null)
             {
