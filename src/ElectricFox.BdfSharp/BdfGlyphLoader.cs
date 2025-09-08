@@ -85,7 +85,13 @@
 
                 try
                 {
-                    bytes.Add(Convert.FromHexString(line.Trim()));
+                    string hex = line.Trim();
+                    if (hex.Length % 2 == 1)
+                    {
+                        hex = "0" + hex;
+                    }
+
+                    bytes.Add(Convert.FromHexString(hex));
                 }
                 catch (FormatException ex)
                 {
