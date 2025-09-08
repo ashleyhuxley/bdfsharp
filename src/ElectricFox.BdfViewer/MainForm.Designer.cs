@@ -51,6 +51,10 @@
             groupBox1 = new GroupBox();
             previewTextbox = new TextBox();
             glyphBox = new PictureBox();
+            pointSizeTextbox = new TextBox();
+            intendedReolutionTextbox = new TextBox();
+            label4 = new Label();
+            label7 = new Label();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
@@ -68,7 +72,7 @@
             characterListView.Dock = DockStyle.Fill;
             characterListView.Location = new Point(0, 0);
             characterListView.Name = "characterListView";
-            characterListView.Size = new Size(432, 922);
+            characterListView.Size = new Size(447, 900);
             characterListView.TabIndex = 1;
             characterListView.UseCompatibleStateImageBehavior = false;
             characterListView.SelectedIndexChanged += CharacterListViewSelectedIndexChanged;
@@ -91,17 +95,17 @@
             splitContainer1.Panel2.Controls.Add(groupBox2);
             splitContainer1.Panel2.Controls.Add(groupBox1);
             splitContainer1.Panel2.Controls.Add(glyphBox);
-            splitContainer1.Size = new Size(1297, 922);
-            splitContainer1.SplitterDistance = 432;
+            splitContainer1.Size = new Size(1392, 900);
+            splitContainer1.SplitterDistance = 447;
             splitContainer1.TabIndex = 6;
             // 
             // previewTextImage
             // 
             previewTextImage.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             previewTextImage.BackColor = Color.White;
-            previewTextImage.Location = new Point(14, 424);
+            previewTextImage.Location = new Point(3, 546);
             previewTextImage.Name = "previewTextImage";
-            previewTextImage.Size = new Size(829, 486);
+            previewTextImage.Size = new Size(926, 350);
             previewTextImage.TabIndex = 12;
             previewTextImage.TabStop = false;
             previewTextImage.Paint += PreviewTextImagePaint;
@@ -112,7 +116,7 @@
             groupBox3.Controls.Add(label5);
             groupBox3.Controls.Add(glyphEncodingTextbox);
             groupBox3.Controls.Add(glyphNameTextbox);
-            groupBox3.Location = new Point(14, 220);
+            groupBox3.Location = new Point(14, 320);
             groupBox3.Name = "groupBox3";
             groupBox3.Size = new Size(502, 116);
             groupBox3.TabIndex = 11;
@@ -155,12 +159,13 @@
             // 
             // sizeGroupBox
             // 
+            sizeGroupBox.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             sizeGroupBox.Controls.Add(size10Xradio);
             sizeGroupBox.Controls.Add(size2Xradio);
             sizeGroupBox.Controls.Add(size1Xradio);
-            sizeGroupBox.Location = new Point(537, 356);
+            sizeGroupBox.Location = new Point(626, 478);
             sizeGroupBox.Name = "sizeGroupBox";
-            sizeGroupBox.Size = new Size(306, 62);
+            sizeGroupBox.Size = new Size(303, 62);
             sizeGroupBox.TabIndex = 13;
             sizeGroupBox.TabStop = false;
             sizeGroupBox.Text = "Preview Size";
@@ -202,6 +207,10 @@
             // 
             // groupBox2
             // 
+            groupBox2.Controls.Add(label7);
+            groupBox2.Controls.Add(label4);
+            groupBox2.Controls.Add(intendedReolutionTextbox);
+            groupBox2.Controls.Add(pointSizeTextbox);
             groupBox2.Controls.Add(glyphsTextbox);
             groupBox2.Controls.Add(label3);
             groupBox2.Controls.Add(label2);
@@ -211,7 +220,7 @@
             groupBox2.Controls.Add(openButton);
             groupBox2.Location = new Point(14, 12);
             groupBox2.Name = "groupBox2";
-            groupBox2.Size = new Size(502, 190);
+            groupBox2.Size = new Size(502, 302);
             groupBox2.TabIndex = 10;
             groupBox2.TabStop = false;
             groupBox2.Text = "Font Information";
@@ -279,10 +288,11 @@
             // 
             // groupBox1
             // 
+            groupBox1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             groupBox1.Controls.Add(previewTextbox);
-            groupBox1.Location = new Point(14, 356);
+            groupBox1.Location = new Point(3, 478);
             groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(502, 62);
+            groupBox1.Size = new Size(564, 62);
             groupBox1.TabIndex = 14;
             groupBox1.TabStop = false;
             groupBox1.Text = "Preview Text";
@@ -292,28 +302,65 @@
             previewTextbox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             previewTextbox.Location = new Point(6, 22);
             previewTextbox.Name = "previewTextbox";
-            previewTextbox.Size = new Size(480, 23);
+            previewTextbox.Size = new Size(542, 23);
             previewTextbox.TabIndex = 3;
             previewTextbox.TextChanged += PreviewTextboxTextChanged;
             // 
             // glyphBox
             // 
+            glyphBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             glyphBox.BackColor = Color.White;
             glyphBox.Location = new Point(537, 12);
             glyphBox.Name = "glyphBox";
-            glyphBox.Size = new Size(306, 324);
+            glyphBox.Size = new Size(392, 424);
             glyphBox.TabIndex = 9;
             glyphBox.TabStop = false;
             glyphBox.Paint += GlyphBoxPaint;
+            // 
+            // pointSizeTextbox
+            // 
+            pointSizeTextbox.Location = new Point(102, 175);
+            pointSizeTextbox.Name = "pointSizeTextbox";
+            pointSizeTextbox.ReadOnly = true;
+            pointSizeTextbox.Size = new Size(121, 23);
+            pointSizeTextbox.TabIndex = 9;
+            // 
+            // intendedReolutionTextbox
+            // 
+            intendedReolutionTextbox.Location = new Point(102, 204);
+            intendedReolutionTextbox.Name = "intendedReolutionTextbox";
+            intendedReolutionTextbox.ReadOnly = true;
+            intendedReolutionTextbox.Size = new Size(121, 23);
+            intendedReolutionTextbox.TabIndex = 10;
+            // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Location = new Point(18, 178);
+            label4.Name = "label4";
+            label4.Size = new Size(58, 15);
+            label4.TabIndex = 11;
+            label4.Text = "Point Size";
+            // 
+            // label7
+            // 
+            label7.AutoSize = true;
+            label7.Location = new Point(18, 207);
+            label7.Name = "label7";
+            label7.Size = new Size(63, 15);
+            label7.TabIndex = 12;
+            label7.Text = "Resolution";
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1297, 922);
+            ClientSize = new Size(1392, 900);
             Controls.Add(splitContainer1);
+            MinimumSize = new Size(1020, 710);
             Name = "MainForm";
             Text = "BDF Font Viewer";
+            Load += MainForm_Load;
             splitContainer1.Panel1.ResumeLayout(false);
             splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
@@ -355,5 +402,9 @@
         private TextBox previewTextbox;
         private PictureBox glyphBox;
         private Button openButton;
+        private Label label7;
+        private Label label4;
+        private TextBox intendedReolutionTextbox;
+        private TextBox pointSizeTextbox;
     }
 }

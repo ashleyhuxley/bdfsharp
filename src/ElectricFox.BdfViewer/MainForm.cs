@@ -1,3 +1,4 @@
+using System.ComponentModel.Design;
 using System.Drawing.Imaging;
 using ElectricFox.BdfSharp;
 
@@ -48,6 +49,8 @@ namespace ElectricFox.BdfViewer
             fontNameTextbox.Text = loadedFont?.FontName ?? string.Empty;
             versionTextbox.Text = loadedFont?.Version ?? string.Empty;
             glyphsTextbox.Text = loadedFont?.GlyphCount.ToString() ?? string.Empty;
+            intendedReolutionTextbox.Text = $"{loadedFont?.IntendedResolution.Width}, {loadedFont?.IntendedResolution.Height}";
+            pointSizeTextbox.Text = loadedFont?.PointSize.ToString() ?? string.Empty;
         }
 
         private void LoadGlyphInformation()
@@ -289,6 +292,11 @@ namespace ElectricFox.BdfViewer
             {
                 await LoadFont(openDialog.FileName);
             }
+        }
+
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }
