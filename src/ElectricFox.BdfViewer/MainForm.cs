@@ -1,4 +1,3 @@
-using System.ComponentModel.Design;
 using System.Drawing.Imaging;
 using ElectricFox.BdfSharp;
 

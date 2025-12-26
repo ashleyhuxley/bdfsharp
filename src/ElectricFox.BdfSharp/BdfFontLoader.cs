@@ -1,6 +1,7 @@
 ﻿using System.Buffers;
 using System.Drawing;
 using System.IO.Pipelines;
+using System.Reflection;
 using System.Text;
 
 namespace ElectricFox.BdfSharp
@@ -20,18 +21,15 @@ namespace ElectricFox.BdfSharp
         private readonly Dictionary<string, string> _properties = new();
         private List<BdfGlyph> _chars = new();
 
-        public async Task<BdfFont> LoadAsync(string filePath)
+        public async Task<BdfFont> LoadFromStreamAsync(Stream stream)
         {
             var pipe = new Pipe();
             PipeReader reader = pipe.Reader;
             PipeWriter writer = pipe.Writer;
 
-            using (var file = File.OpenRead(filePath))
-            {
-                Task writing = FillPipeAsync(file, writer);
-                Task reading = ReadPipeAsync(reader);
-                await Task.WhenAll(reading, writing);
-            }
+            Task writing = FillPipeAsync(stream, writer);
+            Task reading = ReadPipeAsync(reader);
+            await Task.WhenAll(reading, writing);
 
             var geommetry = new BdfGeometry
             {
@@ -46,8 +44,11 @@ namespace ElectricFox.BdfSharp
             {
                 FontName = _fontName ?? string.Empty,
                 Version = _version ?? string.Empty,
-                IntendedResolution = _resolution ?? throw new BdfLoadException("SIZE was not specified"),
-                FontBoundingBox = _fontBoundingBox ?? throw new BdfLoadException("Bounding Box was not specified"),
+                IntendedResolution =
+                    _resolution ?? throw new BdfLoadException("SIZE was not specified"),
+                FontBoundingBox =
+                    _fontBoundingBox
+                    ?? throw new BdfLoadException("Bounding Box was not specified"),
                 GlyphCount = _charCount,
                 Properties = new Dictionary<string, string>(_properties),
                 Glyphs = _chars,
@@ -56,7 +57,32 @@ namespace ElectricFox.BdfSharp
             };
         }
 
-        private async Task FillPipeAsync(FileStream stream, PipeWriter writer)
+        public async Task<BdfFont> LoadAsync(string filePath)
+        {
+            using var file = File.OpenRead(filePath);
+
+            return await LoadFromStreamAsync(file);
+        }
+
+        public async Task<BdfFont> LoadFromEmbeddedResourceAsync(
+            string resourceName,
+            Assembly assembly
+        )
+        {
+            using var stream = assembly.GetManifestResourceStream(resourceName);
+
+            return stream == null
+                ? throw new ResourceNotFoundException(resourceName, $"Embedded resource {resourceName} not found")
+                : await LoadFromStreamAsync(stream);
+        }
+
+        public async Task<BdfFont> LoadFromEmbeddedResourceAsync(string resourceName)
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            return await LoadFromEmbeddedResourceAsync(resourceName, assembly);
+        }
+
+        private static async Task FillPipeAsync(Stream stream, PipeWriter writer)
         {
             const int minimumBufferSize = 512;
 
@@ -121,7 +147,10 @@ namespace ElectricFox.BdfSharp
             await reader.CompleteAsync();
         }
 
-        private bool TryReadLine(ref ReadOnlySequence<byte> buffer, out ReadOnlySequence<byte> line)
+        private static bool TryReadLine(
+            ref ReadOnlySequence<byte> buffer,
+            out ReadOnlySequence<byte> line
+        )
         {
             // Look for LF
             SequencePosition? position = buffer.PositionOf((byte)'\n');
@@ -156,14 +185,16 @@ namespace ElectricFox.BdfSharp
             int spaceIndex = line.IndexOf(' ');
             if (spaceIndex < 0)
             {
-                throw new FormatException("Line does not contain a space separating keyword and value.");
+                throw new FormatException(
+                    "Line does not contain a space separating keyword and value."
+                );
             }
 
             string keyword = line.Substring(0, spaceIndex).Trim();
             string rawValue = line.Substring(spaceIndex + 1).Trim();
 
             string value = rawValue.Trim();
-            if (value.StartsWith("\"") && value.EndsWith("\"") && value.Length >= 2)
+            if (value.StartsWith('\"') && value.EndsWith('\"') && value.Length >= 2)
             {
                 value = value.Substring(1, value.Length - 2);
             }
@@ -200,8 +231,8 @@ namespace ElectricFox.BdfSharp
                     return;
                 }
 
-                var property = ParseAttribute(lineString);
-                _properties[property.Keyword] = property.Value;
+                var (Keyword, Value) = ParseAttribute(lineString);
+                _properties[Keyword] = Value;
             }
             else
             {
@@ -235,7 +266,12 @@ namespace ElectricFox.BdfSharp
                         break;
                     case "FONTBOUNDINGBOX":
                         CheckAttributeLength(4, attributeCount, command);
-                        _fontBoundingBox = BdfBoundingBox.Parse(values[1], values[2], values[3], values[4]);
+                        _fontBoundingBox = BdfBoundingBox.Parse(
+                            values[1],
+                            values[2],
+                            values[3],
+                            values[4]
+                        );
                         break;
                     case "CHARS":
                         CheckAttributeLength(1, attributeCount, command);
@@ -271,7 +307,6 @@ namespace ElectricFox.BdfSharp
                         _VVector = ParsePoint(values[1], values[2], command);
                         break;
                 }
-
             }
         }
     }

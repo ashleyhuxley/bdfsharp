@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using System.Reflection;
 
 namespace ElectricFox.BdfSharp
 {
@@ -53,6 +54,24 @@ namespace ElectricFox.BdfSharp
         {
             var loader = new BdfFontLoader();
             return await loader.LoadAsync(fileName);
+        }
+
+        public static async Task<BdfFont> LoadAsync(Stream stream)
+        {
+            var loader = new BdfFontLoader();
+            return await loader.LoadFromStreamAsync(stream);
+        }
+
+        public static async Task<BdfFont> LoadFromEmbeddedResourceAsync(string resourceName)
+        {
+            var loader = new BdfFontLoader();
+            return await loader.LoadFromEmbeddedResourceAsync(resourceName);
+        }
+
+        public static async Task<BdfFont> LoadFromEmbeddedResourceAsync(string resourceName, Assembly assembly)
+        {
+            var loader = new BdfFontLoader();
+            return await loader.LoadFromEmbeddedResourceAsync(resourceName, assembly);
         }
 
         /// <summary>
