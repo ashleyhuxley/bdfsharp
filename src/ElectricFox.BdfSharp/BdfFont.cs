@@ -154,7 +154,7 @@ namespace ElectricFox.BdfSharp
 
             foreach (var c in values)
             {
-                var glyph = Glyphs.FirstOrDefault(g => g.Encoding == c);
+                var glyph = LookupGlyph(c, glyphLookupOption);
 
                 if (glyph != null)
                 {
